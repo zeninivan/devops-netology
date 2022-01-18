@@ -66,6 +66,36 @@ bash    1425 vagrant    0u   CHR  136,0      0t0       3 /dev/pts/0
 bash    1425 vagrant    1u   CHR  136,0      0t0       3 /dev/pts/0
 bash    1425 vagrant    2w   CHR    1,3      0t0       6 /dev/null
 
+******************************
+****Доработка к заданию 4:****
+******************************
+
+Добрый день. Попробую по-другому решить это задание.
+
+Открываем две ssh сессии терминала к виртуальной машине:
+
+В первой сессии имеем:  
+vagrant@vagrant:~$ tty
+/dev/pts/0
+
+Во второй сессии имеем:
+vagrant@vagrant:~$ tty
+/dev/pts/2
+
+Используя /dev/stderr, находим ссылку на свой собственный поток ошибок, /dev/stderr будет “свой” у каждого процесса
+
+vagrant@vagrant:~$ ls -l /dev/stderr
+lrwxrwxrwx 1 root root 15 Jan 14 18:01 /dev/stderr -> /proc/self/fd/2
+vagrant@vagrant:~$ ls -l /proc/self/fd/2
+lrwx------ 1 vagrant vagrant 64 Jan 18 15:59 /proc/self/fd/2 -> /dev/pts/0
+
+Далее, с помощью ">" перенаправляем поток на вторую сессию терминала /dev/pts/2:
+vagrant@vagrant:~$ ls -l /proc/self/fd/2>/dev/pts/2
+vagrant@vagrant:~$ 
+
+Во второй сессии терминала появится вывод на экран:
+vagrant@vagrant:~$ lrwx------ 1 vagrant vagrant 64 Jan 18 16:01 /proc/self/fd/2 -> /dev/pts/0
+
 
 5. Получится ли одновременно передать команде файл на stdin и вывести ее stdout в другой файл? Приведите работающий пример.
 

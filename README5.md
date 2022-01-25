@@ -122,6 +122,69 @@ root@vagrant:/mnt/data# du -shc ./*
 4.0K	./small
 12K	total
 
+*****************************************************************************************************
+									Задание 3 (доработка)
+В данном примере нет удаления файла и нет постоянной записи в файл. dd выполнится всего один раз. 
+Запустить тот же пинг с перенаправлением в текстовый файл и попробуйте на нём.
+*****************************************************************************************************
+В этот раз воспользуемся текстовым файлом "newfile". 
+
+vagrant@vagrant:~$ ls -l
+total 8
+-rw-rw-r-- 1 vagrant vagrant 157 Jan 11 18:15 newfile
+-rw-rw-r-- 1 vagrant vagrant 157 Jan 11 18:18 newfile_out
+
+Сейчас он занимает 4kb
+vagrant@vagrant:~$ du -shc ./*
+4.0K	./newfile
+4.0K	./newfile_out
+8.0K	total
+vagrant@vagrant:~$ 
+
+Направляем вывод ping ya.ru в текстовый файл newfile:
+vagrant@vagrant:~$ ping ya.ru >newfile
+
+Файл постепенно наполняется
+vagrant@vagrant:~$ du -shc ./*
+16K	./newfile
+4.0K	./newfile_out
+20K	total
+
+vagrant@vagrant:~$ du -shc ./*
+28K	./newfile
+4.0K	./newfile_out
+32K	total
+
+vagrant@vagrant:~$ du -shc ./*
+80K	./newfile
+4.0K	./newfile_out
+84K	total
+vagrant@vagrant:
+
+vagrant@vagrant:~$ du -shc ./*
+100K	./newfile
+4.0K	./newfile_out
+104K	total
+
+Со второй сессии терминала удаляем открытый файл:
+vagrant@vagrant:~$ rm -f newfile
+
+Теперь посмотрим удаленные процессы через lsof:
+vagrant@vagrant:~$ sudo bash
+root@vagrant:/home/vagrant# lsof | grep deleted
+ping      3196                        vagrant    1w      REG              253,0   105763    1048608 /home/vagrant/newfile (deleted)
+root@vagrant:/home/vagrant# 
+
+Далее перенаправим запущенный процесс в удаленный файл, использую fd. Указываем pid нашего процесса 3196 и номер открытого файл дескрипотора 2.
+root@vagrant:/home/vagrant# cat >/proc/3196/fd/2
+
+Объем файла стал равен 0
+root@vagrant:/home/vagrant# du -shc ./*
+0	./newfile
+4.0K	./newfile_out
+4.0K	total
+root@vagrant:/home/vagrant# 
+
 
 4. Занимают ли зомби-процессы какие-то ресурсы в ОС (CPU, RAM, IO)?
 

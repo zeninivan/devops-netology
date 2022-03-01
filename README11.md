@@ -1,35 +1,37 @@
-Домашнее задание к занятию "3.9. Элементы безопасности информационных систем"
+# Домашнее задание к занятию "3.9. Элементы безопасности информационных систем" #
 
 
-1. Установите Bitwarden плагин для браузера. Зарегестрируйтесь и сохраните несколько паролей.
+#### 1. Установите Bitwarden плагин для браузера. Зарегестрируйтесь и сохраните несколько паролей.
 
-Плагин Bitwarden успешно установлен в Firefox и зарегистрирован. Сохранил пароли и логины для GitHub, GitLab и Bitbucket.
-Добавлен скриншот "Снимок экрана ДЗ 3.9 упражнение 1".
-***************************************************************************************************************************************************************************************************************************************************************
+Плагин Bitwarden успешно установлен в Firefox и зарегистрирован. Сохранены пароли и логины для GitHub, GitLab и Bitbucket.
+*Добавлен скриншот "Снимок экрана ДЗ 3.9 упражнение 1".*
 
+![](../../HomeTasks/ДЗ 3.9. Элементы безопасности/Снимок экрана ДЗ 3.9 упражнение 1.png)
+***
 
-2. Установите Google authenticator на мобильный телефон. Настройте вход в Bitwarden акаунт через Google authenticator OTP.
+#### 2. Установите Google authenticator на мобильный телефон. Настройте вход в Bitwarden акаунт через Google authenticator OTP.
 
-У меня уже было установлено приложение Authy, я воспользовался им. Добавил аккаунт Bitwarden и включил в настройках двухфакторную аутентификацию.
+Установлено приложение Authy. Добавил аккаунт Bitwarden и включил в настройках двухфакторную аутентификацию.
 Two-step Login работает.
-**************************************************************************************************************************************************************************************************************************************************************
 
+*Добавлен скриншот "Снимок экрана ДЗ 3.9 упражнение 1".*
 
-3. Установите apache2, сгенерируйте самоподписанный сертификат, настройте тестовый сайт для работы по HTTPS.
+![](../../HomeTasks/ДЗ 3.9. Элементы безопасности/Снимок экрана ДЗ 3.9 упражнение 2.png)
+***
+
+#### 3. Установите apache2, сгенерируйте самоподписанный сертификат, настройте тестовый сайт для работы по HTTPS.
 
 Устанавливаем пакет apache2
-sudo apt install apache2
+```sudo apt install apache2```
 
 Включаем mod_ssl с помощью команды a2enmod:
-sudo a2enmod ssl
+```sudo a2enmod ssl```
 
 Чтобы активировать новую конфигурацию, перезапускаем apache2:
-sudo systemctl restart apache2
+```sudo systemctl restart apache2```
 
 Создаем файлы SSL-ключа и сертификата с помощью команды openssl:
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
-//subj "/C=RU/ST=Moscow/L=Moscow/O=Company Name/OU=Org/CN=www.example.com"//
-
+```
 ivan@HP-Pavilion-dv6:~$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
 [sudo] пароль для ivan: 
 Generating a RSA private key
@@ -52,12 +54,12 @@ Organizational Unit Name (eg, section) []:Org
 Common Name (e.g. server FQDN or YOUR name) []:www.example.com
 Email Address []:
 ivan@HP-Pavilion-dv6:~$
+```
+Настройка Apache для использования SSL:
 
-Настройка Apache для использования SSL.
-Открываем новый файл в каталоге /etc/apache2/sites-available.
-
-sudo vim /etc/apache2/sites-available/www.example.com.conf
-
+Открываем новый файл в каталоге */etc/apache2/sites-available*.
+```sudo vim /etc/apache2/sites-available/www.example.com.conf```
+```
 <VirtualHost *:443>
    ServerName www.example.com
    DocumentRoot /var/www/www.example.com
@@ -66,7 +68,7 @@ sudo vim /etc/apache2/sites-available/www.example.com.conf
    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 </VirtualHost>
-
+```
 Теперь создадим наш DocumentRoot и поместим в него HTML-файл для целей тестирования:
 sudo mkdir /var/www/www.example.com
 

@@ -1,0 +1,338 @@
+Курсовая работа по итогам модуля "DevOps и системное администрирование"
+
+Задание
+
+1. Создайте виртуальную машину Linux.
+
+VM создана:
+ivan@HP-Pavilion-dv6:~/Vagrant$ vagrant up
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Checking if box 'bento/ubuntu-20.04' version '202112.19.0' is up to date...
+==> default: There was a problem while downloading the metadata for your box
+==> default: to check for updates. This is not an error, since it is usually due
+==> default: to temporary network problems. This is just a warning. The problem
+==> default: encountered was:
+==> default: 
+==> default: The requested URL returned error: 404 Not Found
+==> default: 
+==> default: If you want to check for box updates, verify your network connection
+==> default: is valid and try again.
+==> default: Resuming suspended VM...
+==> default: Booting VM...
+==> default: Waiting for machine to boot. This may take a few minutes...
+    default: SSH address: 127.0.0.1:2222
+    default: SSH username: vagrant
+    default: SSH auth method: private key
+==> default: Machine booted and ready!
+==> default: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+==> default: flag to force provisioning. Provisioners marked to run always will still run.
+ivan@HP-Pavilion-dv6:~/Vagrant$
+
+
+2. Установите ufw и разрешите к этой машине сессии на порты 22 и 443, при этом трафик на интерфейсе localhost (lo) должен ходить свободно на все порты.
+
+apt install ufw
+# посмотреть настроенные правила
+sudo ufw status verbose
+# добавить правило для любых IP
+sudo ufw allow allow ssh/tcp
+# Добавить правило для определенной сети
+sudo ufw allow from 172.30.0.7/24
+# Удалить правило
+sudo ufw delete allow from 172.30.0.7/24
+# Удалить правило по номеру
+sudo ufw status numbered
+sudo ufw delete 2
+# Настроить логирование
+sudo ufw logging on
+tail -f /var/log/ufw.log
+# Включить фаервол
+sudo ufw enable
+
+vagrant@vagrant:~$ sudo ufw status
+Status: inactive
+vagrant@vagrant:~$ sudo ufw enable
+Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+Firewall is active and enabled on system startup
+vagrant@vagrant:~$ sudo ufw status
+Status: active
+vagrant@vagrant:~$ sudo ufw status verbose
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+vagrant@vagrant:~$ sudo ufw allow OpenSSH
+Rule added
+Rule added (v6)
+vagrant@vagrant:~$ sudo ufw allow 22
+Rule added
+Rule added (v6)
+vagrant@vagrant:~$ sudo ufw allow 443
+Rule added
+Rule added (v6)
+vagrant@vagrant:~$ sudo ufw status
+Status: active
+
+To                         Action      From
+--                         ------      ----
+OpenSSH                    ALLOW       Anywhere                  
+22                         ALLOW       Anywhere                  
+443                        ALLOW       Anywhere                  
+OpenSSH (v6)               ALLOW       Anywhere (v6)             
+22 (v6)                    ALLOW       Anywhere (v6)             
+443 (v6)                   ALLOW       Anywhere (v6)             
+
+vagrant@vagrant:~$
+
+
+3. Установите hashicorp vault (инструкция по ссылке).
+
+Копируем архив vault на виртуальную машину.
+vagrant scp /home/ivan/Vagrant/vault_1.9.3_linux_amd64.zip :/home/vagrant/vault_1.9.3_linux_amd64.zip
+примеры команд: 
+//vagrant scp <some_local_file_or_dir> [vm_name]:<somewhere_on_the_vm>
+//vagrant scp file_on_host.txt :file_on_vm.txt
+
+Распаковываем архив vault:
+vagrant@vagrant:~$ unzip vault_1.9.3_linux_amd64.zip
+Archive:  vault_1.9.3_linux_amd64.zip
+  inflating: vault                   
+vagrant@vagrant:~$ ll
+
+Переместим исполняемый файл Vault в PATH, чтобы сделать его доступным в оболочке.
+vagrant@vagrant:~$ sudo cp vault /usr/local/bin/
+
+Установим флаг Linux в двоичном формате. Это повышает безопасность, позволяя блокировать память без повышения привилегий.
+vagrant@vagrant:~$ sudo setcap cap_ipc_lock=+ep /usr/local/bin/vault
+
+Проверим версию Vault:
+vagrant@vagrant:~$ vault --version
+Vault v1.9.3 (7dbdd57243a0d8d9d9e07cd01eb657369f8e1b8a)
+vagrant@vagrant:~$ vault
+
+
+4. Cоздайте центр сертификации по инструкции (ссылка) и выпустите сертификат для использования его в настройке веб-сервера nginx (срок жизни сертификата - месяц).
+
+Устанавливаем jq:
+vagrant@vagrant:~$ sudo apt-get install jq
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following additional packages will be installed:
+  libjq1 libonig5
+The following NEW packages will be installed:
+  jq libjq1 libonig5
+0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+Need to get 313 kB of archives.
+After this operation, 1062 kB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 http://us.archive.ubuntu.com/ubuntu focal/universe amd64 libonig5 amd64 6.9.4-1 [142 kB]
+Get:2 http://us.archive.ubuntu.com/ubuntu focal-updates/universe amd64 libjq1 amd64 1.6-1ubuntu0.20.04.1 [121 kB]
+Get:3 http://us.archive.ubuntu.com/ubuntu focal-updates/universe amd64 jq amd64 1.6-1ubuntu0.20.04.1 [50.2 kB]
+Fetched 313 kB in 4s (89.0 kB/s)
+Selecting previously unselected package libonig5:amd64.
+(Reading database ... 40687 files and directories currently installed.)
+Preparing to unpack .../libonig5_6.9.4-1_amd64.deb ...
+Unpacking libonig5:amd64 (6.9.4-1) ...
+Selecting previously unselected package libjq1:amd64.
+Preparing to unpack .../libjq1_1.6-1ubuntu0.20.04.1_amd64.deb ...
+Unpacking libjq1:amd64 (1.6-1ubuntu0.20.04.1) ...
+Selecting previously unselected package jq.
+Preparing to unpack .../jq_1.6-1ubuntu0.20.04.1_amd64.deb ...
+Unpacking jq (1.6-1ubuntu0.20.04.1) ...
+Setting up libonig5:amd64 (6.9.4-1) ...
+Setting up libjq1:amd64 (1.6-1ubuntu0.20.04.1) ...
+Setting up jq (1.6-1ubuntu0.20.04.1) ...
+Processing triggers for man-db (2.9.1-1) ...
+Processing triggers for libc-bin (2.31-0ubuntu9.2) ...
+vagrant@vagrant:~$
+
+vagrant@vagrant:~$ vault server -dev -dev-root-token-id root
+==> Vault server configuration:
+
+             Api Address: http://127.0.0.1:8200
+                     Cgo: disabled
+         Cluster Address: https://127.0.0.1:8201
+              Go Version: go1.17.5
+              Listener 1: tcp (addr: "127.0.0.1:8200", cluster address: "127.0.0.1:8201", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled")
+               Log Level: info
+                   Mlock: supported: true, enabled: false
+           Recovery Mode: false
+                 Storage: inmem
+                 Version: Vault v1.9.3
+             Version Sha: 7dbdd57243a0d8d9d9e07cd01eb657369f8e1b8a
+
+==> Vault server started! Log data will stream in below:
+
+
+You may need to set the following environment variable:
+
+    $ export VAULT_ADDR='http://127.0.0.1:8200'
+
+The unseal key and root token are displayed below in case you want to
+seal/unseal the Vault or re-authenticate.
+Unseal Key: boculfMKoK8sauad66VSsTQNuDF0h0uXW+YV8bXzIEU=
+Root Token: root
+Development mode should NOT be used in production installations!
+
+vagrant@vagrant:~$ export VAULT_ADDR=http://127.0.0.1:8200
+vagrant@vagrant:~$ export VAULT_TOKEN=root
+
+**********************************************8
+Авторизуемся в Vault
+vault login
+***********************************************
+
+Step 1: Generate root CA
+In this step, you are going to generate a self-signed root certificate using PKI secrets engine.
+
+vagrant@vagrant:~$ vault secrets enable pki
+Success! Enabled the pki secrets engine at: pki/
+vagrant@vagrant:~$
+
+vagrant@vagrant:~$ vault secrets tune -max-lease-ttl=720h pki
+Success! Tuned the secrets engine at: pki/
+vagrant@vagrant:~$ 
+
+Generate the root certificate and save the certificate in CA_cert.crt:
+vagrant@vagrant:~$ vault write -field=certificate pki/root/generate/internal \
+> common_name="example.com" \
+> ttl=720h > CA_cert.crt
+vagrant@vagrant:~$ 
+
+Configure the CA and CRL URLs:
+vagrant@vagrant:~$ vault write pki/config/urls \
+>      issuing_certificates="$VAULT_ADDR/v1/pki/ca" \
+>      crl_distribution_points="$VAULT_ADDR/v1/pki/crl"
+Success! Data written to: pki/config/urls
+vagrant@vagrant:~$ 
+
+Step 2: Generate intermediate CA
+
+First, enable the pki secrets engine at the pki_int path.
+vagrant@vagrant:~$ vault secrets enable -path=pki_int pki
+Success! Enabled the pki secrets engine at: pki_int/
+vagrant@vagrant:~$ 
+
+Tune the pki_int secrets engine to issue certificates with a maximum time-to-live (TTL) of 720 hours:
+vagrant@vagrant:~$ vault secrets tune -max-lease-ttl=720h pki_int
+Success! Tuned the secrets engine at: pki_int/
+vagrant@vagrant:~$ 
+
+Execute the following command to generate an intermediate and save the CSR as pki_intermediate.csr.
+vault write -format=json pki_int/intermediate/generate/internal \
+     common_name="example.com Intermediate Authority" \
+     | jq -r '.data.csr' > pki_intermediate.csr
+
+Sign the intermediate certificate with the root CA private key, and save the generated certificate as intermediate.cert.pem:
+vault write -format=json pki/root/sign-intermediate csr=@pki_intermediate.csr \
+     format=pem_bundle ttl="720h" \
+     | jq -r '.data.certificate' > intermediate.cert.pem
+
+Once the CSR is signed and the root CA returns a certificate, it can be imported back into Vault:
+vagrant@vagrant:~$ vault write pki_int/intermediate/set-signed certificate=@intermediate.cert.pem
+Success! Data written to: pki_int/intermediate/set-signed
+vagrant@vagrant:~$ 
+
+Step 3: Create a role
+
+Create a role named example-dot-com which allows subdomains:
+vagrant@vagrant:~$ vault write pki_int/roles/example-dot-com \
+>      allowed_domains="example.com" \
+>      allow_subdomains=true \
+>      max_ttl="720h"
+Success! Data written to: pki_int/roles/example-dot-com
+vagrant@vagrant:~$ 
+
+
+Step 4: Request certificates
+Execute the following command to request a new certificate for the test.example.com domain based on the example-dot-com role.
+Создаем сертификат для домена test.example.com
+vault write -format=json pki_int/issue/example-dot-com common_name="test.example.com" ttl="72h"
+
+Парсим и сохраняем сертификат в правильном формате
+test.example.com
+cat mycrt.json | jq -r .data.certificate > test.example.com.crt.pem
+//cat mycrt.json | jq -r .data.issuing_ca >> test.example.com.crt.pem //не нужен, не используется
+cat mycrt.json | jq -r .data.private_key > test.example.com.crt.key
+cat mycrt.json | jq -r .data.ca_chain[] >> test.example.com.crt.pem 
+
+To revoke a certificate, execute the following command.
+vault write pki_int/revoke serial_number="50:ed:a6:8b:a6:07:2b:2c:06:40:92:ca:7f:0e:44:a4:13:0f:c4:65"
+
+Посмотреть список сертификатов:
+vault list pki_int_ca/certs
+
+5. Установите корневой сертификат созданного центра сертификации в доверенные в хостовой системе.
+
+Здравствуйте, корневой сертификат должен быть добавлен в доверенные на хосте, если браузер - firefox, то и в браузерные доверенные тоже. 
+Далее, сертификат, на котором работает nginx должен быть выпущен на то же самое доменное имя, по которому вы обращаетесь к нему из браузера. 
+
+And from the guest like this:
+vagrant scp :file_on_vm.txt file_on_host.txt
+
+vagrant scp :CA_cert.crt CA_cert.crt
+vagrant scp :intermediate.cert.pem intermediate.cert.pem
+
+ivan@HP-Pavilion-dv6:~/Vagrant$ vagrant scp :CA_cert.crt CA_cert.crt
+Warning: Permanently added '[127.0.0.1]:2222' (ECDSA) to the list of known hosts.
+CA_cert.crt
+
+ivan@HP-Pavilion-dv6:~/Vagrant$ vagrant scp :intermediate.cert.pem intermediate.cert.pem
+Warning: Permanently added '[127.0.0.1]:2222' (ECDSA) to the list of known hosts.
+intermediate.cert.pem  
+
+Копируем корневой сертификат в папку для доверенных:
+sudo cp rootCA.crt /usr/local/share/ca-certificates/
+
+Запустите следующую команду для обновления общесистемного списка: 
+ivan@HP-Pavilion-dv6:/usr/local/share/ca-certificates$ sudo update-ca-certificates
+Updating certificates in /etc/ssl/certs...
+1 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+
+Проверим наличие нашего CA сертификата среди доверенных: 
+awk -v cmd='openssl x509 -noout -subject' ' /BEGIN/{close(cmd)};{print | cmd}' < /etc/ssl/certs/ca-certificates.crt | grep -i example.com
+
+Удалить лишний добавленный:
+sudo rm /usr/local/share/ca-certificates/intermediate.cert.crt
+и еще отсюда cd /etc/ssl/certs
+sudo update-ca-certificates
+
+
+6. Установите nginx.
+Установлено. Добавлен скриншот.
+
+
+7.  По инструкции (ссылка) настройте nginx на https, используя ранее подготовленный сертификат:
+
+    можно использовать стандартную стартовую страницу nginx для демонстрации работы сервера;
+    можно использовать и другой html файл, сделанный вами;
+
+Проверка веб-сервера
+systemctl status nginx 
+Добавлен скриншот Задание 7 снимок 1 и 2
+
+Проведите тестирования, чтобы убедиться в отсутствии ошибок синтаксиса в файлах Nginx:
+sudo nginx -t
+
+Здравствуйте, корневой сертификат должен быть добавлен в доверенные на хосте, если браузер - firefox, то и в браузерные доверенные тоже. 
+Далее, сертификат, на котором работает nginx должен быть выпущен на то же самое доменное имя, по которому вы обращаетесь к нему из браузера. 
+
+
+8. Откройте в браузере на хосте https адрес страницы, которую обслуживает сервер nginx.
+Добавлены снимки к заданию.
+
+
+9.  Создайте скрипт, который будет генерировать новый сертификат в vault:
+
+Далее в следующем задании, тебе все это надо автоматизировать в скрипт. 
+Что бы ты не искал в сообщениях вверху и не тратил свое время. Скину тебе подсказку. 
+
+#create certificate, 30 days
+vault write -format=json pki_int/issue/example-dot-com common_name="test.example.com" ttl="730h" > /etc/ssl/website.crt
+
+cat /etc/ssl/website.crt | jq -r .data.certificate > /etc/ssl/website.crt.pem
+cat /etc/ssl/website.crt | jq -r .data.ca_chain[ ] >> /etc/ssl/website.crt.pem
+cat /etc/ssl/website.crt | jq -r .data.private_key > /etc/ssl/website.key

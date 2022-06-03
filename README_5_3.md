@@ -60,7 +60,7 @@ root@e48cc72fc3f1:/usr/share/nginx/html#
 ````
 
 *Добавлен скриншот "Задание 1 снимок 1".*
-![](https://github.com/zeninivA.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/05-virt-03-docker-usage/Task_1_2022-06-03.png)
 
 ---
 

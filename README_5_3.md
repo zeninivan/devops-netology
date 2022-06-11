@@ -137,6 +137,108 @@ Gitlab сервер для реализации CI/CD процессов и пр
 
 ### Ответ:
 
+Проверяем наличие образов debian и centos
+````
+ivan@HP-Pavilion-dv6:~$ docker images
+REPOSITORY                TAG       IMAGE ID       CREATED        SIZE
+zeninivan/dev-netology1   first     d90ffaae6e4a   8 days ago     196MB
+nginx                     latest    0e901e68141f   2 weeks ago    142MB
+debian                    latest    4eacea30377a   2 weeks ago    124MB
+centos                    latest    5d0da3dc9764   8 months ago   231MB
+````
+
+Создаем docker volume на хосте:
+````
+ivan@HP-Pavilion-dv6:~/devops-netology/05-virt-03-docker-usage/data$ docker volume create my-vol
+my-vol
+ivan@HP-Pavilion-dv6:~/devops-netology/05-virt-03-docker-usage/data$ docker volume ls
+DRIVER    VOLUME NAME
+local     my-vol
+ivan@HP-Pavilion-dv6:~/devops-netology/05-virt-03-docker-usage/data$ docker volume inspect my-vol
+[
+    {
+        "CreatedAt": "2022-06-11T14:50:54+03:00",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/snap/docker/common/var-lib-docker/volumes/my-vol/_data",
+        "Name": "my-vol",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+````
+
+Запускаем первый контейнер из образа centos, подключив папку /data из хостовой машины в /data контейнера:
+````
+ivan@HP-Pavilion-dv6:~$ docker run -d --name my-vol -v /var/snap/docker/common/var-lib-docker/volumes/my-vol/_data:/data centos sleep infinity
+17d7d965b8f0ce65321d60c1cec6f2909dc784a083e54308d2471c3dc8f81a72
+ivan@HP-Pavilion-dv6:~$ docker ps
+CONTAINER ID   IMAGE     COMMAND            CREATED         STATUS         PORTS     NAMES
+17d7d965b8f0   centos    "sleep infinity"   7 seconds ago   Up 6 seconds             my-vol
+````
+
+Запускаем второй контейнер из образа debian, подключив папку /data из хостовой машины в /data контейнера:  
+````
+ivan@HP-Pavilion-dv6:~$ docker run -v /var/snap/docker/common/var-lib-docker/volumes/my-vol/_data:/data -d debian sleep infinity
+62c22b53acf89e942db6cd33674bd349d85635aebbf8dacb0171049d502cba5a
+````
+
+Проверяем, что оба контейнера запущены:
+````
+ivan@HP-Pavilion-dv6:~$ docker ps
+CONTAINER ID   IMAGE     COMMAND            CREATED          STATUS          PORTS     NAMES
+62c22b53acf8   debian    "sleep infinity"   2 minutes ago    Up 2 minutes              jolly_lalande
+17d7d965b8f0   centos    "sleep infinity"   10 minutes ago   Up 10 minutes             my-vol
+````
+
+Подключаемся к первому контейнеру (centos) с помощью docker exec и создаем текстовый файл в /data:
+````
+ivan@HP-Pavilion-dv6:~$ docker exec -it 17d7d965b8f0 bash
+[root@17d7d965b8f0 /]# echo 123 > /data/testfile_centos
+[root@17d7d965b8f0 /]# ls /data
+testfile_centos
+````
+
+Добавляем файл в папку /data на хостовой машине:
+````
+ivan@HP-Pavilion-dv6:~$ sudo bash
+[sudo] пароль для ivan: 
+root@HP-Pavilion-dv6:/home/ivan# echo 12345 > /var/snap/docker/common/var-lib-docker/volumes/my-vol/_data/testfile_on_host_ubuntu
+root@HP-Pavilion-dv6:/home/ivan# ls /var/snap/docker/common/var-lib-docker/volumes/my-vol/_data
+testfile_centos  testfile_on_host_ubuntu
+````
+
+Подключаемся во второй контейнер (debian) и отображаем листинг и содержание файлов в /data контейнера:
+````
+ivan@HP-Pavilion-dv6:~$ docker exec -it 62c22b53acf8 bash
+root@62c22b53acf8:/# cd data
+root@62c22b53acf8:/data# ls -lah
+total 8.0K
+drwxr-xr-x 2 root root 4.0K Jun 11 11:50 .
+drwxr-xr-x 1 root root 4.0K Jun 11 19:00 ..
+root@62c22b53acf8:/data# ls -lah
+total 12K
+drwxr-xr-x 2 root root 4.0K Jun 11 19:09 .
+drwxr-xr-x 1 root root 4.0K Jun 11 19:00 ..
+-rw-r--r-- 1 root root    4 Jun 11 19:09 testfile_centos
+root@62c22b53acf8:/data# ls -lah
+total 16K
+drwxr-xr-x 2 root root 4.0K Jun 11 19:12 .
+drwxr-xr-x 1 root root 4.0K Jun 11 19:00 ..
+-rw-r--r-- 1 root root    4 Jun 11 19:09 testfile_centos
+-rw-r--r-- 1 root root    6 Jun 11 19:12 testfile_on_host_ubuntu
+root@62c22b53acf8:/data# cat testfile_centos
+123
+root@62c22b53acf8:/data# cat testfile_on_host_ubuntu
+12345
+````
+
+*Добавлен скриншот "Задание 3 снимок 1".*
+![](https://03.png)
+
+*Добавлен скриншот "Задание 3 снимок 2".*
+![](https://gith06-03.png)
+
 ---
 
 ## Задача 4 (*)

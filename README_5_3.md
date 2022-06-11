@@ -234,10 +234,10 @@ root@62c22b53acf8:/data# cat testfile_on_host_ubuntu
 ````
 
 *Добавлен скриншот "Задание 3 снимок 1".*
-![](https://03.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/05-virt-03-docker-usage/Task_3_1_2022-06-11.png)
 
 *Добавлен скриншот "Задание 3 снимок 2".*
-![](https://gith06-03.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/05-virt-03-docker-usage/Task_3_2_2022-06-11.png)
 
 ---
 

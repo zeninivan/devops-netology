@@ -10,7 +10,7 @@
 ### Ответ:
 
 *Добавлен скриншот "DZ_5_4_Task_1_2022-06-17".*
-![](https://github.com.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_4_Task_1_2022-06-17.png)
 
 ---
 
@@ -24,7 +24,7 @@
 ### Ответ:
 
 *Добавлен скриншот "DZ_5_4_Task_2_2022-06-21".*
-![](https://github.com.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_4_Task_2_2022-06-21.png)
 
 ---
 
@@ -39,7 +39,7 @@
 ### Ответ:
 
 *Добавлен скриншот "DZ_5_4_Task_3_2022-06-21".*
-![](https://github.com.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_4_Task_3_2022-06-21.png)
 
 ---
 

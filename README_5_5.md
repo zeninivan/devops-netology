@@ -37,10 +37,10 @@ Overlay-сети используются в контексте кластеро
 ### Ответ:
 
 *Добавлен скриншот "DZ_5_5_Task_2_1_2022-06-29".*
-![](https://githu.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_5_Task_2_1_2022-06-29.png)
 
 *Добавлен скриншот "DZ_5_5_Task_2_2_2022-06-29".*
-![](https://githu.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_5_Task_2_2_2022-06-29.png)
 
 ---
 
@@ -54,10 +54,10 @@ Overlay-сети используются в контексте кластеро
 ### Ответ:
 
 *Добавлен скриншот "DZ_5_5_Task_3_1_2022-06-29".*
-![](https://githu.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_5_Task_3_1_2022-06-29.png)
 
 *Добавлен скриншот "DZ_5_5_Task_3_2_2022-06-29".*
-![](https://githu.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_5_5_Task_3_2_2022-06-29.png)
 
 ---
 

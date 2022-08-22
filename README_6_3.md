@@ -290,6 +290,97 @@ mysql> show profiles;
 
 ### Решение:
 
-К сожалению, решение подготовить не успел.
+Скорость IO важнее сохранности данных
+
+innodb_flush_log_at_trx_commit — значение устанавливается в 0, 1, 2. 0 означает, что лог сбрасывается на диск раз в секунду, вне зависимости от транзакций. 
+При 1 - лог сбрасывается при каждой завершенной транзакции.  
+При 2 - лог хранится в ОЗУ. 
+Значение “0” даст наибольшую производительность. В этом случае буфер будет сбрасываться в лог файл независимо от транзакций. В этом случае риск потери данных возрастает.
+````
+innodb_flush_log_at_trx_commit = 0
+````
+
+Нужна компрессия таблиц для экономии места на диске
+
+Движок базы данных InnoDB поддерживает несколько форматов файлов. По умолчанию в InnoDB используется «старый» формат Antelope, но с помощью параметра innodb_file_format это можно изменить.
+Формат файлов Barracuda — самый «новый» и поддерживает компрессию (ROW_FORMAT=COMPRESSED). Это позволяет экономить место и снижать нагрузку на жесткие диски путём использования сжатия.
+````
+innodb_file_format=Barracuda
+````
+
+Размер буффера с незакомиченными транзакциями 1 Мб
+
+Размер буфера журнала, определен опцией innodb_log_buffer_size. Буфер журнала периодически сбрасывается к файлу системного журнала на диске. 
+Большой буфер позволяет большим транзакциям работать без потребности записать журнал на диск прежде, чем транзакции передадут. 
+Таким образом, если у Вас есть транзакции, которые обновляют, вставляют или удаляют много строк, увеличение буфера экономит дисковый ввод/вывод.
+````
+innodb_log_buffer_size = 1M
+````
+
+Буффер кеширования 30% от ОЗУ
+
+MySQL выделяет память различным кэшам и буферам, чтобы улучшить исполнение операций базы данных. Выделяя память для InnoDB, всегда считайте память требуемую операционной системой, 
+память, выделенную другим приложениям, и память для других буферов MySQL и кэшей.
+````
+key_buffer_size = 2448М
+````
+
+Размер файла логов операций 100 Мб
+
+Если запись в двоичный журнал заставляет текущий размер файла системного журнала превышать значение этой переменной, сервер ротирует двоичные журналы (закрывает текущий файл и открывает следующий). 
+Минимальное значение составляет 4096 байтов. Максимальное и значение по умолчанию 1GB.
+````
+max_binlog_size = 100M
+````
+
+Приведите в ответе измененный файл my.cnf.
+
+````
+bash-4.4# cat my.cnf
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/8.0/en/server-configuration-defaults.html
+
+[mysqld]
+#
+innodb_flush_log_at_trx_commit = 0
+innodb_file_format=Barracuda
+innodb_log_buffer_size = 1M
+key_buffer_size = 2448М
+max_binlog_size = 100M
+#
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+# innodb_buffer_pool_size = 128M
+#
+# Remove leading # to turn on a very important data integrity option: logging
+# changes to the binary log between backups.
+# log_bin
+#
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+
+# Remove leading # to revert to previous value for default_authentication_plugin,
+# this will increase compatibility with older clients. For background, see:
+# https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_default_authentication_plugin
+# default-authentication-plugin=mysql_native_password
+
+skip-host-cache
+skip-name-resolve
+datadir=/var/lib/mysql
+socket=/var/run/mysqld/mysqld.sock
+secure-file-priv=/var/lib/mysql-files
+user=mysql
+
+pid-file=/var/run/mysqld/mysqld.pid
+[client]
+socket=/var/run/mysqld/mysqld.sock
+
+!includedir /etc/mysql/conf.d/
+bash-4.4#
+````
 
 ---

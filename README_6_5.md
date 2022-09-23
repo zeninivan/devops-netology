@@ -71,7 +71,7 @@ Cоберите docker-образ и сделайте push в ваш docker.io �
 docker build -t elasticsearch:v1 .
 ````
 *Добавлен скриншот "DZ_6_5_Task_1_snapshot_1.png".*
-![](https://github.com/zeninivan/devops-netology/blob/main/HomeTasks/Virtualization/%8.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_6_5_Task_1_snapshot_1.png)
 
 Запускаем контейнер:
 
@@ -80,7 +80,7 @@ docker run -d -p 9200:9200 de07ba7798dc
 curl -X GET 'http://localhost:9200/'
 
 *Добавлен скриншот "DZ_6_5_Task_1_snapshot_2.png".*
-![](https://github.com/zeninivan/devops-netology/blob/main/HomeTasks/Virtualization/%8.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_6_5_Task_1_snapshot_2.png)
 
 ---
 
@@ -265,7 +265,7 @@ ivan@HP-Pavilion-dv6:~/Elasticsearch_DZ$
 ````
 
 *Добавлен скриншот "DZ_6_5_Task_3_snapshot_1.png".*
-![](https://github.com/zeninivan/devops-netology/blob/main/HomeTasks/Virtualization/%8.png)
+![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_6_5_Task_3_snapshot_1.png)
 
 Запускаем контейнер:
 

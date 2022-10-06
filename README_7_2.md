@@ -9,6 +9,7 @@
 
 ### Решение:
 Яндекс-облако, Terraform и провайдер подгтовлены к работе.
+
 *Добавлен скриншот "DZ_7_2_Task_1_snapshot_1.png".*
 ![](https://github.com/zeninivan/devops-netology/blob/main/virt-screenshots/DZ_7_2_Task_1_snapshot_1.png)
 
@@ -26,7 +27,9 @@
 
 Ссылку на репозиторий с исходной конфигурацией терраформа:
 
-ссылка
+ссылка на репозиторий:
+
+https://github.com/zeninivan/devops-netology/blob/main/terraform/main.tf
 
 ### Решение:
 ````
